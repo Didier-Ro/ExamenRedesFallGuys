@@ -5,6 +5,7 @@
 
 #include "Engine/TargetPoint.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 
 AGameStateBaseFG::AGameStateBaseFG()
 {
@@ -16,12 +17,19 @@ void AGameStateBaseFG::BeginPlay()
 	Super::BeginPlay();
 	
 	GetTargetPointsPositions();
-	GetWorldTimerManager().SetTimer(TimerHandle,this, &AGameStateBaseFG::ReduceTime, 1.0f, true);
+	GetWorldTimerManager().SetTimer(TimerHandle,this, &AGameStateBaseFG::ReduceStartTime, 1.0f, true);
 }
 
 void AGameStateBaseFG::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+}
+
+void AGameStateBaseFG::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AGameStateBaseFG, StartGameTimer);
+	DOREPLIFETIME(AGameStateBaseFG, GoTimer);
 }
 
 void AGameStateBaseFG::GetTargetPointsPositions()
@@ -44,6 +52,7 @@ void AGameStateBaseFG::GetTargetPointsPositions()
 void AGameStateBaseFG::GetPlayers()
 {
 	GetWorldTimerManager().ClearTimer(TimerHandle);
+	StartGameTimer = 0;
 	UWorld* World = GetWorld();
 	if (World)
 	{
@@ -64,10 +73,14 @@ void AGameStateBaseFG::GetPlayers()
 
 void AGameStateBaseFG::TeleportPlayers()
 {
+	DisableStarTimerUI();
 	for (int32 i = 0; i < PlayersInGame.Num(); i++)
 	{
 		PlayersInGame[i]->SetActorTransform(Targets[i]);
+		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(PlayersInGame[i],i);
+		PlayersInGame[i]->DisableInput(PlayerController);
 	}
+	ReduceGoTimerHandle();
 }
 
 void AGameStateBaseFG::PlayerConnect()
@@ -78,20 +91,49 @@ void AGameStateBaseFG::PlayerConnect()
 
 void AGameStateBaseFG::CheckPlayers()
 {
-	FString PlayerString = FString::Printf(TEXT("Players: %d"), PlayerCount);
-	GEngine->AddOnScreenDebugMessage(-1,5.0f,FColor::Blue, PlayerString);
 	if (PlayerCount >= MaxPlayers)
 	{
 		StartGameTimer = 10;
 	}
 }
 
-void AGameStateBaseFG::ReduceTime()
+void AGameStateBaseFG::ReduceStartTime()
 {
 	StartGameTimer--;
 	if (StartGameTimer <= 0)
 	{
 		GetPlayers();
 	}
+}
+
+void AGameStateBaseFG::ReduceGoTimerHandle()
+{
+	AppearGoTimerUI();
+	GetWorldTimerManager().SetTimer(TimerHandle, this, &AGameStateBaseFG::ReduceGoTimer, 1.0f,true);
+}
+
+void AGameStateBaseFG::ReduceGoTimer()
+{
+	GoTimer--;
+	if (GoTimer <= 0)
+	{
+		GetWorldTimerManager().ClearTimer(TimerHandle);
+		GoTimer = 0;
+		ActivateInputs();
+	}
+}
+
+void AGameStateBaseFG::ActivateInputs()
+{
+	for (int32 i = 0; i<PlayersInGame.Num(); i++)
+	{
+		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(PlayersInGame[i],i);
+		PlayersInGame[i]->EnableInput(PlayerController);
+	}
+	DisableGoTimerUI();
+}
+
+void AGameStateBaseFG::OnRep_StartTimer()
+{
 }
 

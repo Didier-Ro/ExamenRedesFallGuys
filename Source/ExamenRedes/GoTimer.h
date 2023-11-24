@@ -4,21 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "StartGameWidget.generated.h"
+#include "GoTimer.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class EXAMENREDES_API UStartGameWidget : public UUserWidget
+class EXAMENREDES_API UGoTimer : public UUserWidget
 {
 	GENERATED_BODY()
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 WTimerValue;
-	
+	int32 WGoTimerValue;
+
 protected:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
-	
 };

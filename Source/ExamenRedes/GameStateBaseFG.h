@@ -28,8 +28,11 @@ public:
 	UPROPERTY(EditAnywhere)
 	int32 MaxPlayers;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	int32 StartGameTimer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
+	int32 GoTimer;
 
 	FTimerHandle TimerHandle;
 public:
@@ -41,20 +44,44 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void GetPlayers();
 
-	UFUNCTION()
-	void TeleportPlayers();
-
 	UFUNCTION(BlueprintCallable)
 	void PlayerConnect();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void AppearGoTimerUI();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void DisableGoTimerUI();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void DisableStarTimerUI();
+
+private:
+	UFUNCTION()
+	void TeleportPlayers();
+	
 	UFUNCTION()
 	void CheckPlayers();
+	
+	UFUNCTION()
+	void ReduceStartTime();
 
 	UFUNCTION()
-	void ReduceTime();
+	void ReduceGoTimerHandle();
+
+	UFUNCTION()
+	void ReduceGoTimer();
+
+	UFUNCTION()
+	void ActivateInputs();
+
+	UFUNCTION()
+	void OnRep_StartTimer();
 
 protected:
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaSeconds) override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };
