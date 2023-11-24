@@ -9,6 +9,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "ExamenRedesGameMode.h"
+#include "GameStateBaseFG.h"
 #include "OnlineSubsystem.h"
 #include "OnlineSessionSettings.h"
 
@@ -80,6 +82,16 @@ void AExamenRedesCharacter::BeginPlay()
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
+	}
+
+	AExamenRedesGameMode* GameMode = Cast<AExamenRedesGameMode>(GetWorld()->GetAuthGameMode());
+	if (GameMode)
+	{
+		AGameStateBaseFG* GameStateBaseFG = GameMode->GetGameState<AGameStateBaseFG>();
+		if (GameStateBaseFG)
+		{
+			GameStateBaseFG->PlayerConnect();
 		}
 	}
 }

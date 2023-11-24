@@ -20,7 +20,18 @@ class EXAMENREDES_API AGameStateBaseFG : public AGameStateBase
 
 	UPROPERTY()
 	TArray<AExamenRedesCharacter*> PlayersInGame;
-	
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 PlayerCount;
+
+	UPROPERTY(EditAnywhere)
+	int32 MaxPlayers;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 StartGameTimer;
+
+	FTimerHandle TimerHandle;
 public:
 	AGameStateBaseFG();
 
@@ -31,11 +42,19 @@ public:
 	void GetPlayers();
 
 	UFUNCTION()
-	void PrintTargets();
+	void TeleportPlayers();
+
+	UFUNCTION(BlueprintCallable)
+	void PlayerConnect();
 
 	UFUNCTION()
-	void TeleportPlayers();
+	void CheckPlayers();
+
+	UFUNCTION()
+	void ReduceTime();
 
 protected:
 	virtual void BeginPlay() override;
+
+	virtual void Tick(float DeltaSeconds) override;
 };
