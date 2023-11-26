@@ -41,7 +41,18 @@ class AExamenRedesCharacter : public ACharacter
 public:
 	AExamenRedesCharacter();
 	
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerDead();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void DesactiveInput();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void ActiveInput();
+
+	UFUNCTION(BlueprintCallable)
+	void CallPlayerDead();
+	
 protected:
 
 	/** Called for movement input */

@@ -250,6 +250,12 @@ void AExamenRedesCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 
 }
 
+void AExamenRedesCharacter::CallPlayerDead()
+{
+	PlayerDead();
+}
+
+
 void AExamenRedesCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D

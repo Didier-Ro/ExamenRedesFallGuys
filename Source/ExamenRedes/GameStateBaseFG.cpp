@@ -30,6 +30,8 @@ void AGameStateBaseFG::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AGameStateBaseFG, StartGameTimer);
 	DOREPLIFETIME(AGameStateBaseFG, GoTimer);
+	DOREPLIFETIME(AGameStateBaseFG, DeadPlayersTimer);
+	DOREPLIFETIME(AGameStateBaseFG, DeadPlayers);
 }
 
 void AGameStateBaseFG::GetTargetPointsPositions()
@@ -71,14 +73,33 @@ void AGameStateBaseFG::GetPlayers()
 	TeleportPlayers();
 }
 
+void AGameStateBaseFG::IncrementDeadPlayers()
+{
+	DeadPlayers++;
+	if (DeadPlayers >= PlayersInGame.Num())
+	{
+		ReduceDeadPlayersTimer();
+	}
+}
+
+void AGameStateBaseFG::StopAndReturnPlayers()
+{
+	PlayerVictoryUI();
+	for (AExamenRedesCharacter* Player : PlayersInGame)
+	{
+		Player->DesactiveInput();
+	}
+	ReturnMenu();
+}
+
 void AGameStateBaseFG::TeleportPlayers()
 {
 	DisableStarTimerUI();
 	for (int32 i = 0; i < PlayersInGame.Num(); i++)
 	{
 		PlayersInGame[i]->SetActorTransform(Targets[i]);
-		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(PlayersInGame[i],i);
-		PlayersInGame[i]->DisableInput(PlayerController);
+		//APlayerController* PlayerController = UGameplayStatics::GetPlayerController(PlayersInGame[i],i);
+		PlayersInGame[i]->DesactiveInput();
 	}
 	ReduceGoTimerHandle();
 }
@@ -95,6 +116,14 @@ void AGameStateBaseFG::CheckPlayers()
 	{
 		StartGameTimer = 10;
 	}
+}
+
+void AGameStateBaseFG::CheckDeadPlayers()
+{
+	FString PlayersDeadString = FString::Printf(TEXT("Players Dead: %d"), DeadPlayers);
+	GEngine->AddOnScreenDebugMessage(-1,5.0f,FColor::Orange, PlayersDeadString);
+	AllPlayersDeadUI();
+	ReturnMenu();
 }
 
 void AGameStateBaseFG::ReduceStartTime()
@@ -123,17 +152,59 @@ void AGameStateBaseFG::ReduceGoTimer()
 	}
 }
 
+void AGameStateBaseFG::ReduceDeadPlayersTimer()
+{
+	GetWorldTimerManager().SetTimer(TimerHandle,this, &AGameStateBaseFG::ReduceDeadPlayersTimerHandle,1, true);
+}
+
+void AGameStateBaseFG::ReduceDeadPlayersTimerHandle()
+{
+	DeadPlayersTimer--;
+	if (DeadPlayersTimer <= 0)
+	{
+		GetWorldTimerManager().ClearTimer(TimerHandle);
+		DeadPlayersTimer = 0;
+		CheckDeadPlayers();
+	}
+}
+
 void AGameStateBaseFG::ActivateInputs()
 {
 	for (int32 i = 0; i<PlayersInGame.Num(); i++)
 	{
 		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(PlayersInGame[i],i);
-		PlayersInGame[i]->EnableInput(PlayerController);
+		PlayersInGame[i]->ActiveInput();
 	}
 	DisableGoTimerUI();
 }
 
+void AGameStateBaseFG::ReturnMenu()
+{
+	ReturnMenuUI();
+	GetWorldTimerManager().SetTimer(TimerHandle,this, &AGameStateBaseFG::ReturnMenuHandle, 1, true);
+}
+
+void AGameStateBaseFG::ReturnMenuHandle()
+{
+	ReturnMenuTimer--;
+	if (ReturnMenuTimer <= 0)
+	{
+		GetWorldTimerManager().ClearTimer(TimerHandle);
+		ReturnMenuTimer = 0;
+		FString Menu = TEXT("Menu");
+		UGameplayStatics::OpenLevel(GetWorld(), FName(*Menu), true);
+	}
+}
+
 void AGameStateBaseFG::OnRep_StartTimer()
+{
+}
+
+void AGameStateBaseFG::OnRep_DeadPlayersTimer()
+{
+}
+
+void AGameStateBaseFG::OnRep_ReturnMenuTimer()
 {
 }
 
