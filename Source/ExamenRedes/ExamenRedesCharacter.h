@@ -52,6 +52,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void CallPlayerDead();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void DestroyPlayer();
 	
 protected:
 

@@ -191,6 +191,10 @@ void AGameStateBaseFG::ReturnMenuHandle()
 	{
 		GetWorldTimerManager().ClearTimer(TimerHandle);
 		ReturnMenuTimer = 0;
+		for (AExamenRedesCharacter* Player: PlayersInGame)
+		{
+			Player->DestroyPlayer();
+		}
 		FString Menu = TEXT("Menu");
 		UGameplayStatics::OpenLevel(GetWorld(), FName(*Menu), true);
 	}
