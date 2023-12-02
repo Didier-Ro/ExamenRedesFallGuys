@@ -3,6 +3,8 @@
 
 #include "Fall_Controller.h"
 
+#include "Kismet/GameplayStatics.h"
+*
 // Sets default values
 AFall_Controller::AFall_Controller()
 {
@@ -16,6 +18,9 @@ void AFall_Controller::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	PisoIndex = FMath::RandRange(0,Pisos.Num() - 1);
+
+	Pisos[PisoIndex]->DesactivePlayerDetection();
 }
 
 // Called every frame

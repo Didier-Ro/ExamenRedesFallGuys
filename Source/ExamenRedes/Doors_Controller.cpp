@@ -15,7 +15,8 @@ ADoors_Controller::ADoors_Controller()
 void ADoors_Controller::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	SelectRandomDoor();
 }
 
 // Called every frame
@@ -23,5 +24,12 @@ void ADoors_Controller::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void ADoors_Controller::SelectRandomDoor()
+{
+	DoorIndex = FMath::RandRange(0, Doorses.Num()-1);
+
+	Doorses[DoorIndex]->ActivarFisica();
 }
 

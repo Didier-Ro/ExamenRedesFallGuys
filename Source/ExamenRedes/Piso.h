@@ -3,26 +3,25 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Piso.h"
+#include "Components/BoxComponent.h"
 #include "GameFramework/Actor.h"
-#include "Fall_Controller.generated.h"
+#include "Piso.generated.h"
 
 UCLASS()
-class EXAMENREDES_API AFall_Controller : public AActor
+class EXAMENREDES_API APiso : public AActor
 {
 	GENERATED_BODY()
-
 	
 public:	
 	// Sets default values for this actor's properties
-	AFall_Controller();
+	APiso();
+
+	UPROPERTY(EditAnywhere, Category="Component")
+	UStaticMeshComponent* MeshComponent;
+
+	UPROPERTY(EditAnywhere, Category="Component")
+	UBoxComponent* BoxComponent;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<APiso*> Pisos;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 PisoIndex;
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -30,5 +29,9 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+
+	void DesactivePlayerDetection();
 
 };
